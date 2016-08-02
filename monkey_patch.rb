@@ -9,6 +9,46 @@ require 'socket'
 Encoding.default_internal = Encoding::UTF_8
 Encoding.default_external = Encoding::UTF_8
 
+
+#========================================
+=begin
+a1=[1,2,3]
+a2=[1,2]
+
+double_loop(a1,a2) { |a,b|
+  print a,b
+  print "\n"
+}
+
+----output -----
+11
+12
+21
+22
+31
+32
+=end
+#========================================
+
+
+def double_loop(array_one , array_two)
+  array_one.each do |item_a_1|
+    array_two.each do |item_b_1|
+      yield(item_a_1,item_b_1)
+    end
+  end
+end
+
+def double_each(array_one , array_two)
+  array_one.each do |item_a_1|
+    array_two.each do |item_b_1|
+      yield(item_a_1,item_b_1)
+    end
+  end
+end
+
+#========================================
+
 class StringAsHtml
   attr_accessor :html_content
 
@@ -147,6 +187,7 @@ class StringAsTCPServer
   attr_accessor :server
 
   #Noted in RUBY Initialize won't really return things
+  # to do the work , we need use self.new here
   def initialize(input_port)
     @input_port = input_port
   end
@@ -198,6 +239,85 @@ end
 #=======================
 class String 
 
+
+#======================================
+#=== has_any Example====
+#line = " this is a 5 test"
+
+#puts line.has_any([3,5])
+#return 5
+
+#puts line.has_any("5")
+#return 5
+
+#puts line.has_any(5)
+#return 5
+
+#line.has_any([3,5]){ |item|
+  #puts "we found item #{item}"
+#}    
+# return we found item 5
+
+
+#line.has_any("5"){ |item|
+  #puts "we found item #{item}"
+#}
+# return we found item 5
+
+
+#line.has_any(5){ |item|
+  #puts "we found item #{item}"
+#}
+# return we found item 5
+
+
+  def has_any(input_items)  #(&block)
+
+    if block_given?
+      #input as array
+      if input_items.class == Array
+        input_items.each do |item|
+          if self.include? item.to_s
+            yield(item)
+          end
+        end
+      elsif input_items.class == String
+        if self.include? input_items
+          yield(input_items)
+        end
+      elsif input_items.class == Fixnum
+        if self.include? input_items.to_s
+          yield(input_items)
+        end    
+      end
+
+    else # no block given
+      
+      if input_items.class == Array
+        collection = []
+        input_items.each do |item|
+          if self.include? item.to_s
+            return collection << item
+          end
+        end
+      elsif input_items.class == String
+        if self.include? input_items
+          return (input_items)
+        end
+      elsif input_items.class == Fixnum
+        if self.include? input_items.to_s
+          return (input_items)
+        end    
+      end
+
+    end
+
+
+  end #end of def 
+
+
+#======================================
+
   def folder
     return StringAsFolder.new(self)
   end
@@ -234,9 +354,6 @@ class String
 
 
   def to_a
-    #puts "===176==="
-    #puts "\n".encoding
-    #puts self.encoding
     self.split("\n")
   end
 
